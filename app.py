@@ -338,16 +338,30 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
         return {"status": "ok", "google_sheets_configured": bool(os.getenv("GOOGLE_SHEET_ID") and os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE"))}
 
     @app.get("/api/me")
-    def me(request: Request):
-        request.session.setdefault("csrf_token", secrets.token_urlsafe(32))
-        user_id = request.session.get("user_id")
-        if not user_id:
-            return {"authenticated": False, "csrf_token": request.session["csrf_token"]}
+def me(request: Request):
+    user_id = request.session.get("user_id")
+
+    if user_id:
         try:
             user = current_user(request)
+            csrf_token = request.session.setdefault(
+                "csrf_token", secrets.token_urlsafe(32)
+            )
+            return {
+                "authenticated": True,
+                "csrf_token": csrf_token,
+                "user": user,
+            }
         except HTTPException:
-            return {"authenticated": False, "csrf_token": request.session["csrf_token"]}
-        return {"authenticated": True, "csrf_token": request.session["csrf_token"], "user": user}
+            request.session.clear()
+
+    csrf_token = secrets.token_urlsafe(32)
+    request.session["csrf_token"] = csrf_token
+
+    return {
+        "authenticated": False,
+        "csrf_token": csrf_token,
+    }
 
     @app.post("/api/register", status_code=201)
     def register(payload: RegisterInput, request: Request):
