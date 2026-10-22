@@ -1,0 +1,1 @@
+{"name":"LedgerBridge Transaction Collector","short_name":"LedgerBridge","description":"Private transaction entry and reporting workspace","start_url":"/","display":"standalone","background_color":"#f5f8f5","theme_color":"#102b2a","icons":[{"src":"/static/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
