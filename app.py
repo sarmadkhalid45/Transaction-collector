@@ -337,18 +337,21 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
     def health():
         return {"status": "ok", "google_sheets_configured": bool(os.getenv("GOOGLE_SHEET_ID") and os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE"))}
 
-    @app.get("/api/me")
+  @app.get("/api/me")
 def me(request: Request):
     user_id = request.session.get("user_id")
 
     if user_id:
         try:
             user = current_user(request)
-            csrf_token = request.session.setdefault(
-                "csrf_token", secrets.token_urlsafe(32)
-            )
+            csrf_token = request.session.get("csrf_token")
+
+            if not csrf_token:
+                csrf_token = secrets.token_urlsafe(32)
+                request.session["csrf_token"] = csrf_token
+
             return {
-                "authenticated": True,
+                "icated": True,
                 "csrf_token": csrf_token,
                 "user": user,
             }
@@ -359,7 +362,7 @@ def me(request: Request):
     request.session["csrf_token"] = csrf_token
 
     return {
-        "authenticated": False,
+        "icated": False,
         "csrf_token": csrf_token,
     }
 
