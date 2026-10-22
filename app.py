@@ -332,12 +332,18 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
     @app.get("/sw.js")
     def service_worker():
         return FileResponse(Path(__file__).parent / "static" / "sw.js", media_type="application/javascript")
+@app.get("/api/health")
+def health():
+    return {
+        "status": "ok",
+        "google_sheets_configured": bool(
+            os.getenv("GOOGLE_SHEET_ID")
+            and os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE")
+        ),
+    }
 
-    @app.get("/api/health")
-    def health():
-        return {"status": "ok", "google_sheets_configured": bool(os.getenv("GOOGLE_SHEET_ID") and os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE"))}
 
-  @app.get("/api/me")
+@app.get("/api/me")
 def me(request: Request):
     user_id = request.session.get("user_id")
 
@@ -353,6 +359,18 @@ def me(request: Request):
             return {
                 "authenticated": True,
                 "csrf_token": csrf_token,
+                "user": user,
+            }
+        except HTTPException:
+            request.session.clear()
+
+    csrf_token = secrets.token_urlsafe(32)
+    request.session["csrf_token"] = csrf_token
+
+    return {
+        "authenticated": False,
+        "csrf_token": csrf_token,
+    }
                 "user": user,
             }
         except HTTPException:
