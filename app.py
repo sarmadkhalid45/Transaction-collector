@@ -351,7 +351,7 @@ def me(request: Request):
                 request.session["csrf_token"] = csrf_token
 
             return {
-                "icated": True,
+                "authenticated": True,
                 "csrf_token": csrf_token,
                 "user": user,
             }
@@ -362,7 +362,7 @@ def me(request: Request):
     request.session["csrf_token"] = csrf_token
 
     return {
-        "icated": False,
+        "authenticated": False,
         "csrf_token": csrf_token,
     }
 
