@@ -214,7 +214,7 @@ class TransactionInput(BaseModel):
 
 
 def create_app(db_path: str | Path | None = None, admin_email: str | None = None, admin_password: str | None = None) -> FastAPI:
-    path = Path(db_path or os.getenv("DATABASE_PATH", "data/transactions.sqlite3")).resolve()
+    path = Path(db_path or os.getenv("DATABASE_PATH", "postgresql://f:feKq2HGNPbeh5Jtj4U53UELXqb2aqwHp@db-f:5432/f")).resolve()
     initialize_db(path)
     bootstrap_email = (admin_email if admin_email is not None else os.getenv("ADMIN_EMAIL", "")).strip().lower()
     bootstrap_password = admin_password if admin_password is not None else os.getenv("ADMIN_PASSWORD", "")
