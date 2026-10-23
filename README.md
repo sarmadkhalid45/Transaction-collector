@@ -14,7 +14,7 @@ The simplest suitable first release is a single FastAPI application with a same-
 - Administrator account bootstrapping from environment settings; user/admin separation is enforced by the API.
 - Scrypt password hashing, signed 12-hour session cookies, CSRF checks on authenticated writes, input validation, and a basic in-memory login rate limit.
 - Per-user transaction history, create/edit/soft-delete, date/type filters, user-only CSV export, and summaries grouped by currency.
-- Admin reports, search/filtering, users list with suspend/reactivate controls, CSV export, and failed/pending synchronization visibility.
+- Admin reports, search/filtering, direct editing of any submitted transaction, users list with suspend/reactivate controls, CSV export, and failed/pending synchronization visibility.
 - Required per-submission idempotency keys backed by a user-scoped unique database index; Google Sheets append/update by transaction ID, three bounded retry attempts for an ambiguous/transient operation, and a process-local sync lock. The sheet is never cleared.
 - Responsive interface and PWA shell. API data is not cached offline.
 - SQLite schema bootstrap and a matching initial SQL schema file.
@@ -95,6 +95,7 @@ Users can review/edit their own records and request deletion through **Delete my
 - Sign in with the configured admin account to view transaction totals, active-user count, failures, and the records table.
 - Filter by user, date range, category, transaction type, currency, or search text; export the matching rows using **Export CSV**.
 - Totals are shown separately for each currency. Transfers/other types are counted but are not treated as income or expenses. No currency conversion is performed.
+- Use **Edit** beside any submitted transaction to correct its date, type, category, amount, currency, payment method, description, or reference. Saving records an admin audit event and updates the matching Google Sheet row when sync is configured.
 - Suspend or reactivate user accounts in **User access**. A suspended account is denied on its next API request.
 - Sheet connectivity is configured through server environment variables, not through the browser. Restart after changing settings.
 - Back up the SQLite database regularly. Use SQLite's online backup command, not a raw copy of a database file while it is being written:
