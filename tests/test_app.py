@@ -1,3 +1,4 @@
+import re
 import tempfile
 import unittest
 import uuid
@@ -28,6 +29,26 @@ class TransactionCollectorTests(unittest.TestCase):
         if method.upper() == "POST" and path == "/api/transactions":
             headers.setdefault("Idempotency-Key", str(uuid.uuid4()))
         return self.client.request(method.upper(), path, json=payload, headers=headers)
+
+    def test_user_transaction_table_has_a_unique_dom_target(self):
+        html = (Path(__file__).parents[1] / "static" / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(html.count('id="user-rows"'), 1)
+        self.assertIn('id="admin-users-rows"', html)
+
+    def test_admin_can_edit_any_users_transaction(self):
+        self.register()
+        payload = {
+            "transaction_date": "2026-10-21", "transaction_type": "expense", "category": "Original",
+            "amount": "5.00", "currency": "USD", "payment_method": "Cash", "description": "Entered incorrectly"
+        }
+        tx = self.auth("post", "/api/transactions", payload).json()
+        self.auth("post", "/api/logout")
+        self.client.post("/api/login", json={"email": "admin@example.test", "password": "Admin-test-password-2026!"})
+        corrected = {**payload, "category": "Corrected", "amount": "15.00", "description": "Corrected by administrator"}
+        response = self.auth("put", f"/api/admin/transactions/{tx['id']}", corrected)
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["category"], "Corrected")
+        self.assertEqual(response.json()["amount"], "15.00")
 
     def test_registration_requires_explicit_sheet_sharing_consent(self):
         response = self.client.post("/api/register", json={"email": "no@example.test", "password": "Valid-test-password-2026!", "consent": False})
