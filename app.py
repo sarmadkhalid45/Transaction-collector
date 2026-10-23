@@ -354,6 +354,7 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
         try:
             user = current_user(request)
         except HTTPException:
+            request.session.setdefault("csrf_token", secrets.token_urlsafe(32))
             return {"authenticated": False, "csrf_token": request.session["csrf_token"]}
         return {"authenticated": True, "csrf_token": request.session["csrf_token"], "user": user}
 
