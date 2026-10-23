@@ -101,7 +101,10 @@ def initialize_db(path: Path) -> None:
         tx_columns = {row["name"] for row in conn.execute("PRAGMA table_info(transactions)")}
         if "idempotency_key" not in tx_columns:
             conn.execute("ALTER TABLE transactions ADD COLUMN idempotency_key TEXT")
-        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_user_idempotency ON transactions(user_id,idempotency_key) WHERE idempotency_key IS NOT NULL AND deleted_at IS NULL")
+        try:
+            conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_user_idempotency ON transactions(user_id,idempotency_key) WHERE idempotency_key IS NOT NULL AND deleted_at IS NULL")
+        except Exception:
+            conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_user_idempotency ON transactions(user_id,idempotency_key)")
 
 
 def sheet_values(tx: dict[str, Any]) -> list[str]:
@@ -265,6 +268,11 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
                 raise RuntimeError("Configured ADMIN_EMAIL must match an active administrator account")
             if not verify_password(bootstrap_password, stored_admin["password_hash"]):
                 raise RuntimeError("ADMIN_PASSWORD does not match the existing administrator; password changes do not update an existing account")
+        try:
+            with open_db(path) as conn:
+                conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_user_idempotency ON transactions(user_id,idempotency_key) WHERE idempotency_key IS NOT NULL AND deleted_at IS NULL")
+        except Exception:
+            pass
 
 
     if bootstrap_email and bootstrap_password:
