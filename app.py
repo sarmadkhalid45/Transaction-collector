@@ -504,6 +504,23 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
         rows = admin_rows(path, start, end, user_id, category, transaction_type, currency, search)
         return {"items": rows, "summary": summarize(rows)}
 
+    @app.put("/api/admin/transactions/{txid}")
+    def admin_update_transaction(txid: str, payload: TransactionInput, request: Request):
+        actor = current_user(request, admin=True)
+        require_csrf(request)
+        with open_db(path) as conn:
+            row = conn.execute("SELECT id FROM transactions WHERE id=? AND deleted_at IS NULL", (txid,)).fetchone()
+            if not row:
+                raise HTTPException(404, "Transaction not found")
+            fields = payload.model_dump()
+            fields["transaction_date"] = fields["transaction_date"].isoformat()
+            fields["amount"] = format(fields["amount"], ".2f")
+            now = utcnow()
+            conn.execute("UPDATE transactions SET transaction_date=?,transaction_type=?,category=?,amount=?,currency=?,payment_method=?,description=?,reference_number=?,updated_at=?,sync_status='pending',sync_error='' WHERE id=?", (fields["transaction_date"], fields["transaction_type"], fields["category"], fields["amount"], fields["currency"], fields["payment_method"], fields["description"], fields["reference_number"], now, txid))
+        audit(actor["id"], "admin_transaction_updated", txid)
+        perform_sync(txid)
+        return load_tx(txid)
+
     @app.get("/api/admin/export.csv")
     def export_csv(request: Request, start: date | None = None, end: date | None = None, user_id: str | None = None, category: str | None = None, transaction_type: str | None = None, currency: str | None = None, search: str | None = None):
         current_user(request, admin=True)
