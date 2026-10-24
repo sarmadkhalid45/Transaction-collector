@@ -60,5 +60,7 @@
   "option_transfer": "منتقل",
   "option_other": "دیگر",
   "user_suspended": "صارف معطل ہو گیا",
-  "user_reactivated": "صارف بحال ہو گیا"
+  "user_reactivated": "صارف بحال ہو گیا",
+  "auth_title_login": "سائن ان",
+  "auth_title_register": "اکاؤنٹ بنائیں"
 }

@@ -203,15 +203,6 @@ const TRANSLATIONS = {
   },
 };
 
-const $ = (id) => document.getElementById(id);
-const esc = (s) =>
-  String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
 function t(key) {
   return (window.__i18n && window.__i18n[key]) || key;
 }
@@ -223,7 +214,7 @@ async function loadLocale(lang) {
     window.__i18n = await r.json();
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" || lang === "ur" ? "rtl" : "ltr";
-    const sel = $("lang-switch");
+    const sel = document.getElementById("lang-switch");
     if (sel) sel.value = lang;
     localStorage.setItem("lang", lang);
     applyTranslations();
@@ -253,7 +244,7 @@ function initLocale() {
   window.__localeReady = (async () => {
     const saved = localStorage.getItem("lang") || "en";
     await loadLocale(saved);
-    const sel = $("lang-switch");
+    const sel = document.getElementById("lang-switch");
     if (sel) {
       sel.addEventListener("change", async (e) => {
         await loadLocale(e.target.value);
@@ -263,8 +254,4 @@ function initLocale() {
   })();
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initLocale);
-} else {
-  initLocale();
-}
+initLocale();

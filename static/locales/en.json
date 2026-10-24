@@ -60,5 +60,7 @@
   "option_transfer": "Transfer",
   "option_other": "Other",
   "user_suspended": "User suspended",
-  "user_reactivated": "User reactivated"
+  "user_reactivated": "User reactivated",
+  "auth_title_login": "Sign in",
+  "auth_title_register": "Create account"
 }

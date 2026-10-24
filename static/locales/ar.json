@@ -60,5 +60,7 @@
   "option_transfer": "تحويل",
   "option_other": "أخرى",
   "user_suspended": "تم تعليق المستخدم",
-  "user_reactivated": "تم تفعيل المستخدم"
+  "user_reactivated": "تم تفعيل المستخدم",
+  "auth_title_login": "تسجيل الدخول",
+  "auth_title_register": "إنشاء حساب"
 }
