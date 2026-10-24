@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
@@ -340,6 +340,15 @@ def create_app(db_path: str | Path | None = None, admin_email: str | None = None
     @app.get("/sw.js")
     def service_worker():
         return FileResponse(Path(__file__).parent / "static" / "sw.js", media_type="application/javascript")
+
+    @app.get("/api/locales/{lang}")
+    def locale_file(lang: str):
+        if lang not in {"en", "ar", "ur"}:
+            raise HTTPException(404, "Locale not found")
+        path = Path(__file__).parent / "static" / "locales" / f"{lang}.json"
+        if not path.exists():
+            raise HTTPException(404, "Locale not found")
+        return FileResponse(path, media_type="application/json")
 
     @app.get("/api/health")
     def health():
